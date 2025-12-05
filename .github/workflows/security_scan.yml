@@ -1,0 +1,49 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          python -m venv devsecops-venv
+          source devsecops-venv/bin/activate
+          pip install --upgrade pip
+          pip install semgrep trufflehog
+
+      - name: Download and install Trivy
+        run: |
+          TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+          wget https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_$(uname -s)_$(uname -m).tar.gz
+          tar zxvf trivy_$(uname -s)_$(uname -m).tar.gz
+          sudo mv trivy /usr/local/bin/
+          rm trivy_$(uname -s)_$(uname -m).tar.gz
+
+      - name: Run security scan
+        run: |
+          chmod +x ./run_security_scan.sh
+          ./run_security_scan.sh
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-logs
+          path: security_logs/
+

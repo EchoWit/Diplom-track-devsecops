@@ -30,7 +30,7 @@ jobs:
 
       - name: Download and install Trivy
         run: |
-          TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+          TRIVY_VERSION="v0.44.0"
           wget https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_$(uname -s)_$(uname -m).tar.gz
           tar zxvf trivy_$(uname -s)_$(uname -m).tar.gz
           sudo mv trivy /usr/local/bin/

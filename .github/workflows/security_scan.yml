@@ -42,7 +42,7 @@ jobs:
           ./run_security_scan.sh
 
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-logs
           path: security_logs/

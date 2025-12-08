@@ -20,7 +20,7 @@ echo ""
 echo "====================="
 echo "2️⃣  Running TruffleHog (filesystem scan)..."
 echo "====================="
-$TRUFFLEHOG filesystem "$PROJECT_DIR" --json > "$LOG_DIR/trufflehog.json" 2>&1 || echo "TruffleHog scan finished with warnings."
+$TRUFFLEHOG filesystem --repo_path "$PROJECT_DIR" --json > "$LOG_DIR/trufflehog.json" 2>&1 || echo "TruffleHog scan finished with warnings."
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="
 cat "$LOG_DIR/trufflehog.json"   # вывод в Actions

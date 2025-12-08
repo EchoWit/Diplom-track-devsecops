@@ -29,7 +29,7 @@ echo "====================="
 echo "2️⃣  Running TruffleHog (git scan)..."
 echo "====================="
 
-$TRUFFLEHOG --entropy=True --max_depth 3 --json "$PROJECT_DIR" \
+$TRUFFLEHOG --max_depth 2 --json "$PROJECT_DIR" \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."

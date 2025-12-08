@@ -29,7 +29,7 @@ echo "====================="
 echo "2️⃣  Running TruffleHog (secret scan)..."
 echo "====================="
 
-trufflehog --repo_path . --json > "$LOG_DIR/trufflehog.json" 2>&1
+$trufflehog --repo_path . --json > "$LOG_DIR/trufflehog.json" 2>&1
 
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."

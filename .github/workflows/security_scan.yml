@@ -2,11 +2,9 @@ name: Security Scan
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
   security_scan:
@@ -14,12 +12,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -29,73 +27,63 @@ jobs:
 
       - name: Install Nikto
         run: |
-           sudo apt update
-           sudo apt install -y nikto
+          sudo apt update
+          sudo apt install -y nikto
 
       - name: Download and install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
 
-      - name: Run security scan
+      - name: Run security scan (SAST/Secrets)
         run: |
           chmod +x ./run_security_scan.sh
           ./run_security_scan.sh
 
-# Установка Nikto
-- name: Install Nikto
-  run: |
-    sudo apt update
-    sudo apt install -y nikto
+      - name: Run DAST scan (Nikto)
+        run: |
+          chmod +x ./run_dast_scan.sh
+          ./run_dast_scan.sh
 
-# Запуск DAST
-- name: Run DAST scan (Nikto)
-  run: |
-    chmod +x ./run_dast_scan.sh
-    ./run_dast_scan.sh
+      - name: Security Gate (DAST)
+        run: |
+          set -e
+          if grep -iq "OSVDB-" dast_logs/nikto.log; then
+            echo "Critical issues found by Nikto!"
+            exit 1
+          else
+            echo "No critical DAST issues detected."
+          fi
 
-# Security Gate для DAST
-- name: Security Gate (DAST)
-  run: |
-    set -e
-    if grep -iq "OSVDB-" dast_logs/nikto.log; then
-      echo "Critical issues found by Nikto!"
-      exit 1
-    else
-      echo "No critical DAST issues detected."
-    fi
+      - name: Upload DAST logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-logs
+          path: dast_logs/
 
-# Загрузка отчетов
-- name: Upload DAST logs
-  uses: actions/upload-artifact@v4
-  with:
-    name: dast-logs
-    path: dast_logs/
-
-
-      - name: Security Gate
+      - name: Security Gate (SAST + Secrets)
         run: |
           set -e
           CRITICAL_FOUND=0
 
-          # Проверка Semgrep
+          # Semgrep
           if grep -iq "CRITICAL" security_logs/semgrep.log; then
             echo "Critical issues found in Semgrep scan."
             CRITICAL_FOUND=1
           fi
 
-          # Проверка Trivy
+          # Trivy
           if grep -iq "CRITICAL" security_logs/trivy.log; then
             echo "Critical issues found in Trivy scan."
             CRITICAL_FOUND=1
           fi
 
-          # Проверка TruffleHog (наличие секретов)
+          # TruffleHog (secrets)
           if grep -q "\"isSecret\": true" security_logs/trufflehog.json; then
             echo "Secrets detected by TruffleHog."
             CRITICAL_FOUND=1
           fi
 
-          # Прерывание пайплайна при критических находках
+          # Decision
           if [ $CRITICAL_FOUND -eq 1 ]; then
             echo "Security Gate triggered. Failing the build."
             exit 1
@@ -110,8 +98,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ⚠️ Security Gate triggered! Critical issues detected in the scans.
-            Please review the security logs:
+            ⚠️ Security Gate triggered! Critical issues detected.
+            Check logs:
             - Semgrep: security_logs/semgrep.log
             - Trivy: security_logs/trivy.log
             - TruffleHog: security_logs/trufflehog.json
@@ -121,4 +109,3 @@ jobs:
         with:
           name: security-logs
           path: security_logs/
-

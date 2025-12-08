@@ -4,7 +4,7 @@ set -e
 
 mkdir -p dast_logs
 
-TARGET_URL="http://localhost:8000"
+TARGET_URL="http://localhost:8001"
 
 echo "Running Nikto scan on $TARGET_URL..."
 

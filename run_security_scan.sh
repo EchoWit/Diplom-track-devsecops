@@ -30,10 +30,7 @@ echo "====================="
 echo "3️⃣  Running Trivy..."
 echo "====================="
 
-TRIVY="/usr/local/bin/trivy"
-
-# Запуск сканирования файловой системы и секретов
-$TRIVY fs --security-checks vuln,secret "$PROJECT_DIR" > "$LOG_DIR/trivy.log" 2>&1 || true
+/snap/bin/trivy fs --security-checks vuln,secret "$PROJECT_DIR" > "$LOG_DIR/trivy.log" 2>&1 || true
 
 echo "Trivy scan completed. See $LOG_DIR/trivy.log for details."
 

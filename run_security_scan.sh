@@ -26,15 +26,16 @@ cat "$LOG_DIR/semgrep.log"
 
 
 echo "====================="
-echo "2️⃣  Running TruffleHog (secret scan)..."
+echo "2️⃣  Running TruffleHog (git scan)..."
 echo "====================="
 
-$trufflehog --repo_path . --json > "$LOG_DIR/trufflehog.json" 2>&1
-
+$TRUFFLEHOG --entropy=True --max_depth 3 --json "$PROJECT_DIR" \
+  > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="
 cat "$LOG_DIR/trufflehog.json"
+
 
 
 
@@ -43,7 +44,6 @@ echo "====================="
 echo "3️⃣  Running Trivy..."
 echo "====================="
 
-# Trivy установлен через .deb и находится в PATH
 trivy fs --security-checks vuln,secret "$PROJECT_DIR" \
   > "$LOG_DIR/trivy.log" 2>&1 || true
 
@@ -57,8 +57,6 @@ echo "====================="
 echo "4️⃣  Running Nikto (DAST)..."
 echo "====================="
 
-# IMPORTANT: Nikto работает только против HTTP-сервера
-# Убедись, что твой сервис запускается перед этим шагом
 nikto -h http://localhost:8001 \
   -o "$DAST_DIR/nikto.log" -Format txt || true
 

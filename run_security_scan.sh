@@ -29,11 +29,17 @@ echo ""
 echo "====================="
 echo "3️⃣  Running Trivy..."
 echo "====================="
-export PATH=$PATH:/usr/local/bin
-trivy fs --security-checks vuln,secret "$PROJECT_DIR" > "$LOG_DIR/trivy.log" 2>&1 || true
+
+TRIVY="/usr/local/bin/trivy"
+
+# Запуск сканирования файловой системы и секретов
+$TRIVY fs --security-checks vuln,secret "$PROJECT_DIR" > "$LOG_DIR/trivy.log" 2>&1 || true
+
 echo "Trivy scan completed. See $LOG_DIR/trivy.log for details."
+
 echo "===== Trivy Output ====="
-cat "$LOG_DIR/trivy.log"    # вывод в Actions
+cat "$LOG_DIR/trivy.log"
+
 
 echo ""
 echo "====================="

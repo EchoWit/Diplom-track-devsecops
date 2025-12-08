@@ -27,6 +27,11 @@ jobs:
           ./devsecops-venv/bin/pip install --upgrade pip
           ./devsecops-venv/bin/pip install semgrep trufflehog
 
+      - name: Install Nikto
+        run: |
+           sudo apt update
+           sudo apt install -y nikto
+
       - name: Download and install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
@@ -35,6 +40,37 @@ jobs:
         run: |
           chmod +x ./run_security_scan.sh
           ./run_security_scan.sh
+
+# Установка Nikto
+- name: Install Nikto
+  run: |
+    sudo apt update
+    sudo apt install -y nikto
+
+# Запуск DAST
+- name: Run DAST scan (Nikto)
+  run: |
+    chmod +x ./run_dast_scan.sh
+    ./run_dast_scan.sh
+
+# Security Gate для DAST
+- name: Security Gate (DAST)
+  run: |
+    set -e
+    if grep -iq "OSVDB-" dast_logs/nikto.log; then
+      echo "Critical issues found by Nikto!"
+      exit 1
+    else
+      echo "No critical DAST issues detected."
+    fi
+
+# Загрузка отчетов
+- name: Upload DAST logs
+  uses: actions/upload-artifact@v4
+  with:
+    name: dast-logs
+    path: dast_logs/
+
 
       - name: Security Gate
         run: |

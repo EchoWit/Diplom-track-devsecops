@@ -13,6 +13,11 @@ mkdir -p "$DAST_DIR"
 SEMGREP="./devsecops-venv/bin/semgrep"
 TRUFFLEHOG="./devsecops-venv/bin/trufflehog"
 
+echo "Starting temporary web server for DAST..."
+python3 -m http.server 8001 --directory "$PROJECT_DIR" &
+SERVER_PID=$!
+sleep 2
+
 echo ""
 echo "====================="
 echo "1️⃣  Running Semgrep..."
@@ -29,7 +34,7 @@ echo "====================="
 echo "2️⃣  Running TruffleHog (git scan)..."
 echo "====================="
 
-$TRUFFLEHOG --max_depth 2 --json "$PROJECT_DIR" \
+$TRUFFLEHOG --max_depth 1 --json "$PROJECT_DIR" \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
@@ -63,4 +68,6 @@ nikto -h http://localhost:8001 \
 echo "Nikto scan completed. See $DAST_DIR/nikto.log for details."
 echo "===== Nikto Output ====="
 cat "$DAST_DIR/nikto.log"
+kill $SERVER_PID
+echo "Temporary web server stopped."
 

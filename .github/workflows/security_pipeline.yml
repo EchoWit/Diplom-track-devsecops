@@ -65,7 +65,8 @@ jobs:
         run: |
           source venv/bin/activate
           mkdir -p artifacts/trufflehog
-          trufflehog git https://github.com/EchoWit/Diplom-track-devsecops.git --json > artifacts/trufflehog/trufflehog_report.json
+          # Сканируем локальный репозиторий вместо URL
+          trufflehog filesystem --json . > artifacts/trufflehog/trufflehog_report.json
           echo "===== TruffleHog Output ====="
           cat artifacts/trufflehog/trufflehog_report.json
 
@@ -74,4 +75,3 @@ jobs:
         with:
           name: security-reports
           path: artifacts/
-

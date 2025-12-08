@@ -65,8 +65,8 @@ jobs:
         run: |
           source venv/bin/activate
           mkdir -p artifacts/trufflehog
-          # Сканируем локальный репозиторий вместо URL
-          trufflehog filesystem --json . > artifacts/trufflehog/trufflehog_report.json
+          # Сканируем локальный репозиторий
+          trufflehog --json --repo-path . > artifacts/trufflehog/trufflehog_report.json
           echo "===== TruffleHog Output ====="
           cat artifacts/trufflehog/trufflehog_report.json
 

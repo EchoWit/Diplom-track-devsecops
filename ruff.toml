@@ -26,6 +26,10 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    "zaproxy-2.16.1",
+    "zaproxy*/",
+    "**/zaproxy*/",
+    "*/zaproxy*/",
     #  Not for the dojo specific stuff
     "dojo/db_migrations"
 ]

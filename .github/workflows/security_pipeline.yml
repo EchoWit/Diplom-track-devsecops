@@ -1,68 +1,65 @@
 name: Security CI/CD Pipeline
 
 on:
-push:
-branches:
-- master
-pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
-security_scan:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout repository
-uses: actions/checkout@v3
+  security_scan:
+    runs-on: ubuntu-latest
 
-```
-  - name: Set up Python
-    uses: actions/setup-python@v4
-    with:
-      python-version: "3.12"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  - name: Install dependencies
-    run: |
-      python -m venv venv
-      source venv/bin/activate
-      pip install --upgrade pip
-      pip install semgrep trufflehog nikto
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-  - name: Run Semgrep (SAST)
-    run: |
-      source venv/bin/activate
-      mkdir -p artifacts/sast
-      semgrep --config .semgrep_rules.yml --json > artifacts/sast/semgrep_report.json
-      echo "===== Semgrep Output ====="
-      cat artifacts/sast/semgrep_report.json
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install semgrep nikto trufflehog trivy
 
-  - name: Run Nikto (DAST)
-    run: |
-      source venv/bin/activate
-      mkdir -p artifacts/dast
-      # Используем localhost или тестовый URL
-      nikto -h http://localhost:8000 -o artifacts/dast/nikto_report.txt
-      echo "===== Nikto Output ====="
-      cat artifacts/dast/nikto_report.txt
+      - name: Run Semgrep (SAST)
+        run: |
+          source venv/bin/activate
+          mkdir -p artifacts/sast
+          semgrep --config .semgrep_rules.yml --json > artifacts/sast/semgrep_report.json
+          echo "===== Semgrep Output ====="
+          cat artifacts/sast/semgrep_report.json
 
-  - name: Run Trivy (Container / Files)
-    run: |
-      mkdir -p artifacts/trivy
-      # Пример сканирования образа: trivy image <image_name>
-      # Для демонстрации файлов проекта используем каталог
-      trivy fs . > artifacts/trivy/trivy_report.txt || true
-      echo "===== Trivy Output ====="
-      cat artifacts/trivy/trivy_report.txt
+      - name: Run Nikto (DAST)
+        run: |
+          source venv/bin/activate
+          mkdir -p artifacts/dast
+          # Если сервер поднят, использовать URL; иначе можно оставить localhost-заглушку
+          nikto -h http://localhost:8001 -o artifacts/dast/nikto_report.txt
+          echo "===== Nikto Output ====="
+          cat artifacts/dast/nikto_report.txt
 
-  - name: Run TruffleHog (Secrets)
-    run: |
-      mkdir -p artifacts/trufflehog
-      trufflehog filesystem . > artifacts/trufflehog/trufflehog_report.txt || true
-      echo "===== TruffleHog Output ====="
-      cat artifacts/trufflehog/trufflehog_report.txt
+      - name: Run Trivy (Container/File Scan)
+        run: |
+          mkdir -p artifacts/trivy
+          trivy fs --exit-code 0 --format json --output artifacts/trivy/trivy_report.json .
+          echo "===== Trivy Output ====="
+          cat artifacts/trivy/trivy_report.json
 
-  - name: Upload artifacts
-    uses: actions/upload-artifact@v3
-    with:
-      name: security-reports
-      path: artifacts/
-```
+      - name: Run TruffleHog (Secrets Scan)
+        run: |
+          mkdir -p artifacts/trufflehog
+          trufflehog git https://github.com/EchoWit/Diplom-track-devsecops.git --json > artifacts/trufflehog/trufflehog_report.json
+          echo "===== TruffleHog Output ====="
+          cat artifacts/trufflehog/trufflehog_report.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: artifacts/
 

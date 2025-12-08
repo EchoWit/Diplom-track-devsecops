@@ -31,16 +31,15 @@ cat "$LOG_DIR/semgrep.log"
 
 
 echo "====================="
-echo "2️⃣  Running TruffleHog (git scan)..."
+echo "2️⃣  Running TruffleHog (git scan for secrets)..."
 echo "====================="
 
-$TRUFFLEHOG --max_depth 1 --json "$PROJECT_DIR" \
+./devsecops-venv/bin/trufflehog git "$PROJECT_DIR" --json \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="
 cat "$LOG_DIR/trufflehog.json"
-
 
 
 

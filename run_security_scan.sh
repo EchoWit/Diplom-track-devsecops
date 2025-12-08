@@ -34,8 +34,8 @@ echo "====================="
 echo "2️⃣  Running TruffleHog (git scan for secrets)..."
 echo "====================="
 
-./devsecops-venv/bin/trufflehog git "$PROJECT_DIR" --json \
-  > "$LOG_DIR/trufflehog.json" 2>&1 || true
+./devsecops-venv/bin/trufflehog filesystem "$PROJECT_DIR" --json --entropy=True \
+  --exclude_paths "devsecops-venv|__pycache__|node_modules|.git" > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="

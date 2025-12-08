@@ -25,17 +25,17 @@ echo "===== Semgrep Output ====="
 cat "$LOG_DIR/semgrep.log"
 
 
-echo ""
 echo "====================="
-echo "2️⃣  Running TruffleHog (filesystem scan)..."
+echo "2️⃣  Running TruffleHog (secret scan)..."
 echo "====================="
 
-$TRUFFLEHOG filesystem "$PROJECT_DIR" --json \
+$TRUFFLEHOG --entropy=True --json "$PROJECT_DIR" \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="
 cat "$LOG_DIR/trufflehog.json"
+
 
 
 echo ""

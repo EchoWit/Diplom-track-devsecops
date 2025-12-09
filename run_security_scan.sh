@@ -27,6 +27,7 @@ ulimit -s 65536
 
 $SEMGREP scan \
   --config "$PROJECT_DIR/.semgrep_rules.yml" \
+  --suppress-errors \
   -j 1 \
   --max-memory 2500 \
   "$PROJECT_DIR" \

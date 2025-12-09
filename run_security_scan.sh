@@ -23,7 +23,14 @@ echo "====================="
 echo "1️⃣  Running Semgrep..."
 echo "====================="
 
-$SEMGREP scan --config auto "$PROJECT_DIR" > "$LOG_DIR/semgrep.log" 2>&1 || true
+ulimit -s 65536
+
+$SEMGREP scan \
+  --config "$PROJECT_DIR/.semgrep_rules.yml" \
+  -j 1 \
+  --max-memory 2500 \
+  "$PROJECT_DIR" \
+  > "$LOG_DIR/semgrep.log" 2>&1 || true
 
 echo "Semgrep scan completed. See $LOG_DIR/semgrep.log for details."
 echo "===== Semgrep Output ====="
@@ -36,7 +43,7 @@ echo "====================="
 
 REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
 
-./devsecops-venv/bin/trufflehog --json --entropy=True "$REPO_URL" \
+./devsecops-venv/bin/trufflehog --json --max_depth 1 --entropy=True "$REPO_URL" \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."

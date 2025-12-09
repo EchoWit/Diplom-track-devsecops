@@ -31,16 +31,26 @@ cat "$LOG_DIR/semgrep.log"
 
 
 echo "====================="
-echo "2️⃣  Running TruffleHog (git scan for secrets)..."
+echo "2️⃣  Running TruffleHog (secret scan)..."
 echo "====================="
 
-./devsecops-venv/bin/trufflehog filesystem "$PROJECT_DIR" --json --entropy=True \
-  --exclude_paths devsecops-venv __pycache__ node_modules .git \
+# Создаём файл со списком исключений
+EXCLUDE_FILE="$PROJECT_DIR/trufflehog_exclude.txt"
+printf "devsecops-venv\n__pycache__\nnode_modules\n.git\n" > "$EXCLUDE_FILE"
+
+# TruffleHog v2.2.1 — только filesystem
+./devsecops-venv/bin/trufflehog filesystem "$PROJECT_DIR" \
+  --json \
+  --entropy=True \
+  --exclude_paths "$EXCLUDE_FILE" \
   > "$LOG_DIR/trufflehog.json" 2>&1 || true
 
 echo "TruffleHog scan completed. See $LOG_DIR/trufflehog.json for details."
 echo "===== TruffleHog Output ====="
 cat "$LOG_DIR/trufflehog.json"
+
+echo "TruffleHog version:"
+./devsecops-venv/bin/pip show truffleHog | grep Version
 
 
 

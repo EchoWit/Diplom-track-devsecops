@@ -23,11 +23,11 @@ echo "====================="
 echo "1️⃣  Running Semgrep..."
 echo "====================="
 
+set +e
 ulimit -s 65536
 
 $SEMGREP scan \
   --config "$PROJECT_DIR/.semgrep_rules.yml" \
-  --suppress-errors \
   -j 1 \
   --max-memory 2500 \
   "$PROJECT_DIR" \
@@ -36,6 +36,7 @@ $SEMGREP scan \
 echo "Semgrep scan completed. See $LOG_DIR/semgrep.log for details."
 echo "===== Semgrep Output ====="
 cat "$LOG_DIR/semgrep.log"
+set -e 
 
 
 echo "====================="

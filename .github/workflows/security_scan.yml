@@ -68,6 +68,12 @@ jobs:
           name: dast-logs
           path: dast_logs/
 
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-logs
+          path: security_logs/
+
       - name: Security Gate (SAST + Secrets)
         run: |
           set -e
@@ -112,8 +118,3 @@ jobs:
             - Trivy: security_logs/trivy.log
             - TruffleHog: security_logs/trufflehog.json
 
-      - name: Upload logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-logs
-          path: security_logs/
